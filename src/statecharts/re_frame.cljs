@@ -57,12 +57,12 @@
 
 
 (defn process-event [ctx event]
-  (let [configuration (get-in ctx [:db :configuration])
-        statechart    (get-in ctx [:db :statechart])
+  (let [configuration (get-in ctx [:db ::configuration])
+        statechart    (get-in ctx [:db ::statechart])
         event-ctx     {:configuration configuration
                        :fx            (select-keys ctx [:db])}
         {:keys [fx configuration]} (sc/process-event event-ctx statechart event)]
-    (assoc-in fx [:db :configuration] configuration)))
+    (assoc-in fx [:db ::configuration] configuration)))
 
 (defn reg-event [event]
   (re-frame/reg-event-fx event
@@ -79,5 +79,5 @@
                        distinct)]
       (reg-event event))
     (-> fx
-        (assoc-in [:db :configuration] configuration)
-        (assoc-in [:db :statechart] statechart))))
+        (assoc-in [:db ::configuration] configuration)
+        (assoc-in [:db ::statechart] statechart))))

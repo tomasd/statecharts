@@ -29,11 +29,13 @@
 
 (defn find-lcca [states]
   (let [[head & tail] states]
-    (->> (state/proper-ancestors head nil)
-         (filter #(or (state/compound? %) (state/component? %)))
-         (filter (fn [ancestor]
-                   (every? #(state/descendant? % ancestor) tail)))
-         first)))
+    (if (= (:id head) [])
+      head
+      (->> (state/proper-ancestors head nil)
+           (filter #(or (state/compound? %) (state/component? %)))
+           (filter (fn [ancestor]
+                     (every? #(state/descendant? % ancestor) tail)))
+           first))))
 
 (defn transition-domain [t ctx]
   (let [states (effective-target-states t ctx)
