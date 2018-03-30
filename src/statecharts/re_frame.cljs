@@ -55,6 +55,19 @@
   (fn [ctx]
     (dissoc-db-in ctx path)))
 
+(defn fx [ctx fx value]
+  (assoc-in ctx [:fx fx] value))
+
+(defn ctx-fx [fx value]
+  (fn [ctx _]
+    (assoc-in ctx [:fx fx] value)))
+
+(defn conj-fx [ctx fx value]
+  (update-in ctx [:fx fx] (fnil conj []) value))
+
+(defn ctx-conj-fx [fx value]
+  (fn [ctx _]
+    (conj-fx ctx fx value)))
 
 (defn process-event [ctx event]
   (let [configuration (get-in ctx [:db ::configuration])
@@ -66,9 +79,9 @@
 
 (defn reg-event [event]
   (re-frame/reg-event-fx event
-    ;[re-frame/debug]
-    (fn [ctx event]
-      (process-event ctx event))))
+                         ;[re-frame/debug]
+                         (fn [ctx event]
+                           (process-event ctx event))))
 
 (defn initialize [fx statechart]
   (let [{:keys [fx configuration]} (sc/initialize fx statechart)]
