@@ -29,13 +29,11 @@
 
 (defn find-lcca [states]
   (let [[head & tail] states]
-    (if (= (:id head) [])
-      head
-      (->> (state/proper-ancestors head nil)
-           (filter #(or (state/compound? %) (state/component? %)))
-           (filter (fn [ancestor]
-                     (every? #(state/descendant? % ancestor) tail)))
-           first))))
+    (->> (state/proper-ancestors head nil)
+         (filter #(or (state/compound? %) (= (:id %) [])))
+         (filter (fn [ancestor]
+                   (every? #(state/descendant? % ancestor) tail)))
+         first)))
 
 (defn transition-domain [t ctx]
   (let [states (effective-target-states t ctx)
@@ -47,7 +45,7 @@
 
       (and
         (transition/internal? t)
-        #_(state/compound? source)
+        (state/compound? source)
         (not (state/atomic? source))
         (->> states
              (every? #(state/descendant? % source))))
@@ -138,13 +136,6 @@
        (filter transition/targetted-transition?)
        (mapcat (fn [t]
                  (let [ancestor               (transition-domain t ctx)
-                       immediate-anc-children (->> (effective-target-states t ctx)
-                                                   (map #(last (state/proper-ancestors % ancestor)))
-                                                   (remove nil?))
-                       other-children         (if (seq immediate-anc-children)
-                                                (set/difference (into #{} (state/substates ancestor))
-                                                                immediate-anc-children)
-                                                [])
                        acc                    #{}
                        acc                    (add-descendants' (transition/target-state t) ctx acc)
                        acc                    (->> (effective-target-states t ctx)
