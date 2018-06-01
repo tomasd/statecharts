@@ -17,12 +17,16 @@
                                        (map :id)
                                        (into []))
                    :history       (:history ctx)}})
+
+(defn- process-ctx [ctx]
+  (loop [ctx ctx]
+    (if (seq (:internal-queue ctx))
+      (let [ctx (run ctx)]
+        (recur ctx))
+      ctx)))
 (defn process-event [ctx statechart event]
-  (let [ctx (loop [ctx (ctx/init-ctx ctx statechart event)]
-              (if (seq (:internal-queue ctx))
-                (let [ctx (run ctx)]
-                  (recur ctx))
-                ctx))]
+  (let [ctx (-> (ctx/init-ctx ctx statechart event)
+                (process-ctx))]
     (make-result ctx)))
 
 
@@ -30,6 +34,8 @@
   (let [states (->> (state/initialize-statechart statechart)
                     (mapcat #(cons % (state/proper-ancestors % nil)))
                     (distinct))
-        ctx    (enter-states (ctx/init-ctx {:configuration #{}
-                                            :fx            fx} statechart) states)]
+        ctx    (-> (ctx/init-ctx {:configuration #{}
+                                  :fx            fx} statechart)
+                   (enter-states states)
+                   (process-ctx))]
     (make-result ctx)))
