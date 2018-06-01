@@ -1,4 +1,4 @@
-(defproject statecharts "0.2.3"
+(defproject statecharts "0.2.4-SNAPSHOT"
   :description "Statecharts for clojurescript and re-frame"
   :url "https://github.com/tomasd/statecharts"
   :license {:name "Eclipse Public License"
