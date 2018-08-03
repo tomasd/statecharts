@@ -18,11 +18,17 @@
     (dissoc m k)))
 
 (def push-event ctx/push-event)
+(defn ctx-push-event [event]
+  (fn [ctx _]
+    (ctx/push-event ctx event)))
 (defn db [ctx]
   (get-in ctx [:fx :db]))
 
 (defn dispatch [ctx event]
   (update-in ctx [:fx :dispatch-n] (fnil conj []) event))
+(defn ctx-dispatch [event]
+  (fn [ctx _]
+    (update-in ctx [:fx :dispatch-n] (fnil conj []) event)))
 
 (defn ctx-update-db [f & args]
   (fn [ctx]
